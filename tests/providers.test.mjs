@@ -22,7 +22,7 @@ test('parseOcrSpaceResponse throws provider error message', () => {
   }), /Invalid API key/);
 });
 
-test('buildOcrSpaceFormData includes base64 image and language auto-detect flag', () => {
+test('buildOcrSpaceFormData uses broad auto-detect OCR settings', () => {
   const body = buildOcrSpaceFormData({
     apiKey: 'ocr-key',
     imageDataUrl: 'data:image/jpeg;base64,abc',
@@ -31,7 +31,8 @@ test('buildOcrSpaceFormData includes base64 image and language auto-detect flag'
 
   assert.equal(body.get('apikey'), 'ocr-key');
   assert.equal(body.get('isOverlayRequired'), 'false');
-  assert.equal(body.get('OCREngine'), '2');
+  assert.equal(body.get('language'), 'auto');
+  assert.equal(body.get('OCREngine'), '3');
   assert.ok(body.get('base64Image').startsWith('data:image/jpeg;base64,abc'));
 });
 

@@ -10,10 +10,11 @@ export function buildOcrSpaceFormData({ apiKey, imageDataUrl, fileName = 'captur
   body.set('apikey', String(apiKey || '').trim());
   body.set('base64Image', imageDataUrl);
   body.set('filetype', fileName.toLowerCase().endsWith('.png') ? 'PNG' : 'JPG');
+  body.set('language', 'auto');
   body.set('isOverlayRequired', 'false');
   body.set('scale', 'true');
   body.set('detectOrientation', 'true');
-  body.set('OCREngine', '2');
+  body.set('OCREngine', '3');
   return body;
 }
 

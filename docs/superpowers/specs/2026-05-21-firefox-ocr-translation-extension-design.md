@@ -35,6 +35,8 @@ The initial product is a no-backend extension. API keys are stored locally in th
 
 The extension uses OCR.space as the OCR provider. OCR.space's documented free API tier supports personal-use volumes well above the expected usage for small browser-tab captures, with limits including a 1 MB file size for free-tier image uploads.
 
+The default OCR request uses `OCREngine=3` with `language=auto` so screenshots containing non-Latin scripts such as Korean use OCR.space's broad language auto-detection path.
+
 Reference: https://ocr.space/OCRAPI
 
 ### DeepL
