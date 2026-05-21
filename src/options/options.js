@@ -43,6 +43,11 @@ form.addEventListener('submit', async (event) => {
   event.preventDefault();
   const settings = readForm();
   await browser.storage.local.set({ [SETTINGS_KEY]: settings });
+  try {
+    await browser.runtime.sendMessage({ type: MESSAGES.SETTINGS_CHANGED });
+  } catch (_) {
+    // The sidebar may not be open while settings are saved.
+  }
   status.textContent = `Saved. Target language: ${settings.targetLanguage}`;
 });
 

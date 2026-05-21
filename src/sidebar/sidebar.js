@@ -276,7 +276,7 @@ elements.clearNonFavorites.addEventListener('click', () => send(MESSAGES.CLEAR_N
 elements.clearAll.addEventListener('click', () => send(MESSAGES.CLEAR_ALL));
 
 browser.runtime.onMessage.addListener((message) => {
-  if (message?.type === MESSAGES.HISTORY_CHANGED) {
+  if (message?.type === MESSAGES.HISTORY_CHANGED || message?.type === MESSAGES.SETTINGS_CHANGED) {
     loadState();
   }
 });

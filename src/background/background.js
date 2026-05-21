@@ -12,6 +12,7 @@ import { runGoogleTranslate } from '../shared/providers/google-translate.js';
 import { runOcrSpace } from '../shared/providers/ocr-space.js';
 import { hasRequiredApiKeys, normalizeSettings } from '../shared/settings.js';
 import { cropAndCompressSelection } from './capture.js';
+import { ensureServiceConnections } from './preflight.js';
 import { openExtensionShortcutSettings } from './shortcuts.js';
 
 const CAPTURE_COMMAND = 'start-ocr-capture';
@@ -141,6 +142,20 @@ async function runCaptureFlow() {
 
   if (!hasRequiredApiKeys(settings)) {
     await openOptionsPage();
+    return;
+  }
+
+  const preflight = await ensureServiceConnections({ settings });
+  if (!preflight.ok) {
+    if (preflight.stage === 'settings') {
+      await openOptionsPage();
+    }
+    await saveHistory(addHistoryEntry(history, errorEntry({
+      status: preflight.stage === 'ocr' ? STATUS.OCR_FAILED : STATUS.TRANSLATION_FAILED,
+      stage: preflight.stage,
+      message: preflight.message,
+      source
+    }), settings.maxHistoryEntries));
     return;
   }
 

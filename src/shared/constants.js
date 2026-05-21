@@ -23,6 +23,7 @@ export const MESSAGES = Object.freeze({
   START_SELECTION: 'start-selection',
   SELECTION_COMPLETE: 'selection-complete',
   HISTORY_CHANGED: 'history-changed',
+  SETTINGS_CHANGED: 'settings-changed',
   RETRY_OCR: 'retry-ocr',
   RETRY_TRANSLATION: 'retry-translation',
   DELETE_ENTRY: 'delete-entry',
