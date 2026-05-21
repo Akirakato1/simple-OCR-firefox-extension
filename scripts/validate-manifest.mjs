@@ -7,7 +7,7 @@ assert.equal(manifest.manifest_version, 2);
 assert.equal(manifest.name, 'Tab OCR Translate');
 assert.equal(manifest.sidebar_action.default_panel, 'src/sidebar/sidebar.html');
 assert.equal(manifest.options_ui.page, 'src/options/options.html');
-assert.equal(manifest.browser_action.default_title, 'Open OCR Translate Sidebar');
+assert.equal(manifest.browser_action.default_title, 'Toggle OCR Translate Sidebar');
 assert.equal(manifest.browser_action.browser_style, true);
 assert.ok(manifest.background.scripts.includes('src/background/background.js'));
 assert.equal(manifest.background.type, 'module');

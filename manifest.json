@@ -21,7 +21,7 @@
     "open_at_install": true
   },
   "browser_action": {
-    "default_title": "Open OCR Translate Sidebar",
+    "default_title": "Toggle OCR Translate Sidebar",
     "browser_style": true
   },
   "options_ui": {

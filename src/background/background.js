@@ -44,6 +44,14 @@ async function openSidebar() {
   }
 }
 
+async function toggleSidebar() {
+  if (typeof browser.sidebarAction.toggle === 'function') {
+    await browser.sidebarAction.toggle();
+    return;
+  }
+  await openSidebar();
+}
+
 async function openOptionsPage() {
   await browser.runtime.openOptionsPage();
 }
@@ -348,8 +356,8 @@ browser.commands.onCommand.addListener((command) => {
 });
 
 browser.browserAction.onClicked.addListener(() => {
-  openSidebar().catch((error) => {
-    console.error('Could not open sidebar from toolbar button', error);
+  toggleSidebar().catch((error) => {
+    console.error('Could not toggle sidebar from toolbar button', error);
   });
 });
 
