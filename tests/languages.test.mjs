@@ -12,6 +12,9 @@ test('languageName displays target and detected language codes as full names', (
   assert.equal(languageName('EN'), 'English');
   assert.equal(languageName('ko'), 'Korean');
   assert.equal(languageName('KOR'), 'Korean');
+  assert.equal(languageName('TA'), 'Tamil');
+  assert.equal(languageName('TAM'), 'Tamil');
+  assert.equal(languageName('HI'), 'Hindi');
   assert.equal(languageName('ZH-CN'), 'Chinese (Simplified)');
   assert.equal(languageName(''), 'Unknown');
 });
@@ -24,12 +27,15 @@ test('languagePairLabel formats detected and target languages with full names', 
 test('primaryLanguageCountries returns searchable country names for a detected language', () => {
   assert.deepEqual(primaryLanguageCountries('KOR'), ['North Korea', 'South Korea']);
   assert.deepEqual(filterPrimaryLanguageCountries('KOR', 'south'), ['South Korea']);
+  assert.deepEqual(primaryLanguageCountries('TA'), ['India', 'Singapore', 'Sri Lanka']);
+  assert.deepEqual(filterPrimaryLanguageCountries('TAM', 'sri'), ['Sri Lanka']);
   assert.deepEqual(filterPrimaryLanguageCountries('KOR', 'zzzz'), []);
 });
 
 test('normalizeLanguageCode maps provider aliases to one display code', () => {
   assert.equal(normalizeLanguageCode('spa'), 'ES');
   assert.equal(normalizeLanguageCode('jpn'), 'JA');
+  assert.equal(normalizeLanguageCode('tam'), 'TA');
   assert.equal(normalizeLanguageCode('chs'), 'ZH-CN');
   assert.equal(normalizeLanguageCode('cht'), 'ZH-TW');
 });

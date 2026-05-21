@@ -104,15 +104,85 @@ const LANGUAGE_RECORDS = Object.freeze({
     countries: ['Sweden'],
     aliases: ['SWE', 'SWEDISH']
   },
+  BN: {
+    name: 'Bengali',
+    countries: ['Bangladesh', 'India'],
+    aliases: ['BEN', 'BENGALI']
+  },
+  FA: {
+    name: 'Persian',
+    countries: ['Iran'],
+    aliases: ['FAS', 'PER', 'PERSIAN']
+  },
+  GU: {
+    name: 'Gujarati',
+    countries: ['India'],
+    aliases: ['GUJ', 'GUJARATI']
+  },
+  HE: {
+    name: 'Hebrew',
+    countries: ['Israel'],
+    aliases: ['HEB', 'IW', 'HEBREW']
+  },
+  HI: {
+    name: 'Hindi',
+    countries: ['India'],
+    aliases: ['HIN', 'HINDI']
+  },
+  ID: {
+    name: 'Indonesian',
+    countries: ['Indonesia'],
+    aliases: ['IND', 'INDONESIAN']
+  },
+  KN: {
+    name: 'Kannada',
+    countries: ['India'],
+    aliases: ['KAN', 'KANNADA']
+  },
+  ML: {
+    name: 'Malayalam',
+    countries: ['India'],
+    aliases: ['MAL', 'MALAYALAM']
+  },
+  MR: {
+    name: 'Marathi',
+    countries: ['India'],
+    aliases: ['MAR', 'MARATHI']
+  },
+  MS: {
+    name: 'Malay',
+    countries: ['Brunei', 'Malaysia'],
+    aliases: ['MAY', 'MSA', 'MALAY']
+  },
+  PA: {
+    name: 'Punjabi',
+    countries: ['India', 'Pakistan'],
+    aliases: ['PAN', 'PUNJABI']
+  },
   TH: {
     name: 'Thai',
     countries: ['Thailand'],
     aliases: ['THA', 'THAI']
   },
+  TA: {
+    name: 'Tamil',
+    countries: ['India', 'Singapore', 'Sri Lanka'],
+    aliases: ['TAM', 'TAMIL']
+  },
+  TE: {
+    name: 'Telugu',
+    countries: ['India'],
+    aliases: ['TEL', 'TELUGU']
+  },
   TR: {
     name: 'Turkish',
     countries: ['Cyprus', 'Turkey'],
     aliases: ['TUR', 'TURKISH']
+  },
+  UR: {
+    name: 'Urdu',
+    countries: ['India', 'Pakistan'],
+    aliases: ['URD', 'URDU']
   },
   UK: {
     name: 'Ukrainian',
@@ -137,6 +207,9 @@ const LANGUAGE_RECORDS = Object.freeze({
 });
 
 const LANGUAGE_ALIASES = new Map();
+const LANGUAGE_DISPLAY_NAMES = typeof Intl !== 'undefined' && typeof Intl.DisplayNames === 'function'
+  ? new Intl.DisplayNames(['en'], { type: 'language' })
+  : null;
 
 for (const [code, record] of Object.entries(LANGUAGE_RECORDS)) {
   LANGUAGE_ALIASES.set(code, code);
@@ -181,7 +254,9 @@ export function languageName(value) {
   if (!code) {
     return 'Unknown';
   }
-  return LANGUAGE_RECORDS[code]?.name || String(value).trim();
+  return LANGUAGE_RECORDS[code]?.name
+    || LANGUAGE_DISPLAY_NAMES?.of(code.toLowerCase())
+    || String(value).trim();
 }
 
 export function languagePairLabel(sourceLanguage, targetLanguage) {
