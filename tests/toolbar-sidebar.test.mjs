@@ -66,7 +66,7 @@ test('toolbar button toggles the in-tab panel on the active tab using the saved 
     assert.deepEqual(calls, [
       ['query', { active: true, currentWindow: true }],
       ['executeScript', 7, { file: '/src/content/ui-panel-overlay.js', runAt: 'document_idle' }],
-      ['sendMessage', 7, { type: 'toggle-panel', side: 'left' }]
+      ['sendMessage', 7, { type: 'toggle-panel', side: 'left', theme: 'system' }]
     ]);
   } finally {
     console.error = previousConsoleError;

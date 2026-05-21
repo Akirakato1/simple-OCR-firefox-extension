@@ -87,14 +87,16 @@ async function sendPanelMessage(tabId, message) {
 async function openPanel(tabId, settings) {
   return sendPanelMessage(tabId, {
     type: MESSAGES.OPEN_PANEL,
-    side: settings.panelSide
+    side: settings.panelSide,
+    theme: settings.theme
   });
 }
 
 async function togglePanel(tabId, settings) {
   return sendPanelMessage(tabId, {
     type: MESSAGES.TOGGLE_PANEL,
-    side: settings.panelSide
+    side: settings.panelSide,
+    theme: settings.theme
   });
 }
 
