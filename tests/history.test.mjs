@@ -43,4 +43,6 @@ test('history actions toggle favorite, delete, and filter text', () => {
   assert.equal(toggleFavorite(history, 'a')[0].favorite, true);
   assert.deepEqual(deleteHistoryEntry(history, 'a').map((entry) => entry.id), ['b']);
   assert.deepEqual(filterHistory(history, { query: 'good', favoritesOnly: false }).map((entry) => entry.id), ['b']);
+  assert.deepEqual(filterHistory(history, { query: 'spanish', favoritesOnly: false }).map((entry) => entry.id), ['b']);
+  assert.deepEqual(filterHistory(history, { detectedLanguage: 'spa', favoritesOnly: false }).map((entry) => entry.id), ['b']);
 });

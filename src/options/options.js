@@ -1,4 +1,5 @@
 import { MESSAGES, SETTINGS_KEY } from '../shared/constants.js';
+import { languageName, targetLanguageOptions } from '../shared/languages.js';
 import { normalizeSettings } from '../shared/settings.js';
 
 const form = document.querySelector('#settings-form');
@@ -14,6 +15,16 @@ const fields = {
   saveOriginalCrop: document.querySelector('#save-original'),
   maxHistoryEntries: document.querySelector('#max-history')
 };
+
+function populateTargetLanguageOptions() {
+  fields.targetLanguage.innerHTML = '';
+  for (const language of targetLanguageOptions()) {
+    const option = document.createElement('option');
+    option.value = language.code;
+    option.textContent = language.name;
+    fields.targetLanguage.append(option);
+  }
+}
 
 async function loadSettings() {
   const data = await browser.storage.local.get(SETTINGS_KEY);
@@ -48,7 +59,7 @@ form.addEventListener('submit', async (event) => {
   } catch (_) {
     // The sidebar may not be open while settings are saved.
   }
-  status.textContent = `Saved. Target language: ${settings.targetLanguage}`;
+  status.textContent = `Saved. Target language: ${languageName(settings.targetLanguage)}`;
 });
 
 openShortcuts.addEventListener('click', async () => {
@@ -60,4 +71,5 @@ openShortcuts.addEventListener('click', async () => {
   status.textContent = response?.error || 'Could not open shortcut settings. Open about:addons and choose Manage Extension Shortcuts.';
 });
 
+populateTargetLanguageOptions();
 loadSettings();

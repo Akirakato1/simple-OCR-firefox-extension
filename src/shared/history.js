@@ -1,4 +1,5 @@
 import { STATUS } from './constants.js';
+import { languageName, normalizeLanguageCode } from './languages.js';
 
 function fallbackId() {
   if (globalThis.crypto?.randomUUID) {
@@ -99,19 +100,19 @@ export function clearNonFavorites(history = []) {
 
 export function filterHistory(history = [], filters = {}) {
   const query = normalizeText(filters.query).toLowerCase();
-  const detectedLanguage = normalizeText(filters.detectedLanguage).toLowerCase();
-  const targetLanguage = normalizeText(filters.targetLanguage).toLowerCase();
+  const detectedLanguage = normalizeLanguageCode(filters.detectedLanguage).toLowerCase();
+  const targetLanguage = normalizeLanguageCode(filters.targetLanguage).toLowerCase();
 
   return history.filter((entry) => {
     if (filters.favoritesOnly && !entry.favorite) {
       return false;
     }
 
-    if (detectedLanguage && String(entry.detectedLanguage || '').toLowerCase() !== detectedLanguage) {
+    if (detectedLanguage && normalizeLanguageCode(entry.detectedLanguage).toLowerCase() !== detectedLanguage) {
       return false;
     }
 
-    if (targetLanguage && String(entry.translation?.targetLanguage || '').toLowerCase() !== targetLanguage) {
+    if (targetLanguage && normalizeLanguageCode(entry.translation?.targetLanguage).toLowerCase() !== targetLanguage) {
       return false;
     }
 
@@ -125,7 +126,9 @@ export function filterHistory(history = [], filters = {}) {
       entry.source?.tabUrl,
       entry.ocr?.text,
       entry.translation?.text,
-      entry.translation?.targetLanguage
+      entry.translation?.targetLanguage,
+      languageName(entry.detectedLanguage),
+      languageName(entry.translation?.targetLanguage)
     ].join(' ').toLowerCase();
 
     return searchable.includes(query);

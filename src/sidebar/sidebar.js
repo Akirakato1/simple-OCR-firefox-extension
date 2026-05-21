@@ -1,5 +1,11 @@
 import { HISTORY_KEY, MESSAGES, SETTINGS_KEY, STATUS } from '../shared/constants.js';
 import { filterHistory } from '../shared/history.js';
+import {
+  filterPrimaryLanguageCountries,
+  languageName,
+  languagePairLabel,
+  normalizeLanguageCode
+} from '../shared/languages.js';
 import { hasRequiredApiKeys, normalizeSettings } from '../shared/settings.js';
 import { nextSelectedHistoryId } from './selection.js';
 
@@ -7,6 +13,7 @@ const state = {
   history: [],
   settings: normalizeSettings(),
   selectedId: null,
+  countryQuery: '',
   filters: {
     query: '',
     detectedLanguage: '',
@@ -70,9 +77,13 @@ function textPreview(entry) {
 function renderKeyStatus() {
   const ready = hasRequiredApiKeys(state.settings);
   elements.keyStatus.textContent = ready
-    ? `Ready. Target: ${state.settings.targetLanguage}`
+    ? `Ready. Target: ${languageName(state.settings.targetLanguage)}`
     : 'API keys required.';
   elements.keyStatus.className = ready ? 'muted status-complete' : 'muted status-error';
+}
+
+function entryTargetLanguage(entry) {
+  return entry.translation?.targetLanguage || state.settings.targetLanguage;
 }
 
 function renderLatest() {
@@ -90,21 +101,28 @@ function renderLatest() {
   title.textContent = textPreview(latest);
   const meta = document.createElement('p');
   meta.className = `muted ${statusClass(latest)}`;
-  meta.textContent = `${latest.detectedLanguage || 'Unknown'} -> ${latest.translation?.targetLanguage || state.settings.targetLanguage} - ${latest.status}`;
+  meta.textContent = `${languagePairLabel(latest.detectedLanguage, entryTargetLanguage(latest))} - ${latest.status}`;
   elements.latestResult.append(title, meta);
 }
 
 function uniqueLanguages(history) {
-  return [...new Set(history.map((entry) => entry.detectedLanguage).filter(Boolean))].sort();
+  const languages = new Map();
+  for (const entry of history) {
+    const code = normalizeLanguageCode(entry.detectedLanguage);
+    if (code) {
+      languages.set(code, languageName(code));
+    }
+  }
+  return [...languages.entries()].sort((a, b) => a[1].localeCompare(b[1]));
 }
 
 function renderFilters() {
   const current = elements.languageFilter.value;
   elements.languageFilter.innerHTML = '<option value="">Any language</option>';
-  for (const language of uniqueLanguages(state.history)) {
+  for (const [code, name] of uniqueLanguages(state.history)) {
     const option = document.createElement('option');
-    option.value = language;
-    option.textContent = language;
+    option.value = code;
+    option.textContent = name;
     elements.languageFilter.append(option);
   }
   elements.languageFilter.value = current;
@@ -148,7 +166,7 @@ function renderHistoryList() {
     const metaItems = [
       entry.favorite ? { text: 'Favorite' } : null,
       { text: entry.status, className: statusClass(entry) },
-      { text: entry.detectedLanguage || 'Unknown' },
+      { text: languageName(entry.detectedLanguage) },
       { text: shortDate(entry.createdAt) }
     ].filter(Boolean);
     for (const item of metaItems) {
@@ -163,7 +181,11 @@ function renderHistoryList() {
     main.append(title, source, meta);
     button.append(image, main);
     button.addEventListener('click', () => {
-      state.selectedId = nextSelectedHistoryId(state.selectedId, entry.id);
+      const nextSelectedId = nextSelectedHistoryId(state.selectedId, entry.id);
+      if (nextSelectedId !== state.selectedId) {
+        state.countryQuery = '';
+      }
+      state.selectedId = nextSelectedId;
       render();
     });
     elements.historyList.append(button);
@@ -181,6 +203,51 @@ function textarea(label, value) {
   area.value = value || '';
   block.append(span, area);
   return block;
+}
+
+function renderCountryList(list, language, query) {
+  const countries = filterPrimaryLanguageCountries(language, query);
+  list.innerHTML = '';
+
+  if (countries.length === 0) {
+    const empty = document.createElement('p');
+    empty.className = 'empty';
+    empty.textContent = 'No countries found.';
+    list.append(empty);
+    return;
+  }
+
+  for (const country of countries) {
+    const item = document.createElement('span');
+    item.className = 'country-pill';
+    item.textContent = country;
+    list.append(item);
+  }
+}
+
+function countrySearch(entry) {
+  const section = document.createElement('section');
+  section.className = 'country-panel';
+
+  const heading = document.createElement('h3');
+  heading.textContent = `Primary countries: ${languageName(entry.detectedLanguage)}`;
+
+  const input = document.createElement('input');
+  input.type = 'search';
+  input.placeholder = 'Search countries';
+  input.value = state.countryQuery;
+
+  const list = document.createElement('div');
+  list.className = 'country-list';
+  renderCountryList(list, entry.detectedLanguage, state.countryQuery);
+
+  input.addEventListener('input', (event) => {
+    state.countryQuery = event.target.value;
+    renderCountryList(list, entry.detectedLanguage, state.countryQuery);
+  });
+
+  section.append(heading, input, list);
+  return section;
 }
 
 function renderDetails() {
@@ -228,7 +295,7 @@ function renderDetails() {
 
   const meta = document.createElement('p');
   meta.className = `muted ${statusClass(entry)}`;
-  meta.textContent = `${entry.detectedLanguage || 'Unknown'} -> ${entry.translation?.targetLanguage || state.settings.targetLanguage} - ${shortDate(entry.createdAt)} - ${entry.status}`;
+  meta.textContent = `${languagePairLabel(entry.detectedLanguage, entryTargetLanguage(entry))} - ${shortDate(entry.createdAt)} - ${entry.status}`;
 
   const source = document.createElement('p');
   source.className = 'muted';
@@ -238,6 +305,7 @@ function renderDetails() {
     image,
     meta,
     source,
+    countrySearch(entry),
     textarea('OCR text', entry.ocr?.text),
     textarea('Translation', entry.translation?.text),
     textarea('Error', entry.error?.message)
