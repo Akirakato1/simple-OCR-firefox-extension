@@ -35,6 +35,7 @@ export const MESSAGES = Object.freeze({
   OPEN_OPTIONS: 'open-options',
   OPEN_PANEL: 'open-panel',
   TOGGLE_PANEL: 'toggle-panel',
+  CLOSE_PANEL: 'close-panel',
   SET_PANEL_VISIBILITY: 'set-panel-visibility',
   OPEN_SHORTCUTS: 'open-shortcuts'
 });

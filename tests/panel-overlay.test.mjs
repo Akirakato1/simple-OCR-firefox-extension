@@ -49,6 +49,9 @@ function createElement(tagName) {
       return null;
     }
   };
+  if (tagName === 'iframe') {
+    element.contentWindow = {};
+  }
   return element;
 }
 
@@ -56,6 +59,7 @@ async function loadOverlay() {
   const code = await readFile(new URL('../src/content/ui-panel-overlay.js', import.meta.url), 'utf8');
   let messageListener;
   const rafCallbacks = [];
+  const windowListeners = {};
   const documentElement = createElement('html');
   const document = {
     documentElement,
@@ -68,6 +72,9 @@ async function loadOverlay() {
     window: {
       matchMedia() {
         return { matches: true };
+      },
+      addEventListener(type, listener) {
+        windowListeners[type] = listener;
       }
     },
     document,
@@ -111,6 +118,9 @@ async function loadOverlay() {
       if (callback) {
         callback();
       }
+    },
+    postWindowMessage(data, source) {
+      windowListeners.message?.({ data, source });
     }
   };
 }
@@ -129,6 +139,8 @@ test('panel overlay starts hidden offscreen with no edge border or white dark-mo
   assert.equal(overlay.root.style.borderLeft, '0');
   assert.equal(overlay.root.style.borderRight, '0');
   assert.equal(overlay.root.style.background, '#313338');
+  assert.equal(overlay.root.children.length, 1);
+  assert.equal(overlay.root.querySelector('[data-tab-ocr-close]'), null);
   assert.equal(overlay.root.children[0].style.background, '#313338');
   assert.equal(overlay.root.children[0].style.opacity, '0');
   assert.match(overlay.root.children[0].src, /theme=discord-dark/);
@@ -146,4 +158,8 @@ test('panel overlay starts hidden offscreen with no edge border or white dark-mo
 
   overlay.runAnimationFrame();
   assert.equal(overlay.root.style.transform, 'translateX(0)');
+
+  const frameWindow = overlay.root.children[0].contentWindow;
+  overlay.postWindowMessage({ source: 'tab-ocr-translate', type: 'close-panel' }, frameWindow);
+  assert.equal(overlay.root.style.transform, 'translateX(100%)');
 });

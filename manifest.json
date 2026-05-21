@@ -15,8 +15,17 @@
     "persistent": false,
     "type": "module"
   },
+  "icons": {
+    "48": "icons/ocr-o.svg",
+    "96": "icons/ocr-o.svg"
+  },
   "browser_action": {
     "default_title": "Toggle OCR Translate Panel",
+    "default_icon": {
+      "16": "icons/ocr-o.svg",
+      "32": "icons/ocr-o.svg",
+      "48": "icons/ocr-o.svg"
+    },
     "browser_style": true
   },
   "web_accessible_resources": [

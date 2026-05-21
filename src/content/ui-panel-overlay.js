@@ -6,7 +6,9 @@
 
   const MESSAGE_OPEN_PANEL = 'open-panel';
   const MESSAGE_TOGGLE_PANEL = 'toggle-panel';
+  const MESSAGE_CLOSE_PANEL = 'close-panel';
   const MESSAGE_SET_PANEL_VISIBILITY = 'set-panel-visibility';
+  const MESSAGE_SOURCE = 'tab-ocr-translate';
   const SETTINGS_KEY = 'settings';
   const PANEL_ID = 'tab-ocr-translate-panel-root';
   const PANEL_PATH = 'src/sidebar/sidebar.html';
@@ -48,11 +50,6 @@
     return side === 'left' ? 'translateX(-100%)' : 'translateX(100%)';
   }
 
-  function setCloseButtonSide(button, side) {
-    button.style.left = side === 'right' ? '-38px' : '';
-    button.style.right = side === 'left' ? '-38px' : '';
-  }
-
   function applyPanelSide(root, side) {
     const normalized = normalizePanelSide(side);
     root.dataset.side = normalized;
@@ -60,11 +57,6 @@
     root.style.right = normalized === 'right' ? '0' : '';
     root.style.borderLeft = '0';
     root.style.borderRight = '0';
-
-    const closeButton = root.querySelector('[data-tab-ocr-close]');
-    if (closeButton) {
-      setCloseButtonSide(closeButton, normalized);
-    }
   }
 
   function applyPanelTheme(root, frame, theme) {
@@ -142,27 +134,7 @@
     frame.addEventListener('load', () => revealPanel(root, frame), { once: true });
     frame.src = browser.runtime.getURL(panelUrl(theme));
 
-    const close = document.createElement('button');
-    close.type = 'button';
-    close.dataset.tabOcrClose = 'true';
-    close.title = 'Close OCR Translate panel';
-    close.setAttribute('aria-label', 'Close OCR Translate panel');
-    close.textContent = 'x';
-    close.style.position = 'absolute';
-    close.style.top = '10px';
-    close.style.width = '30px';
-    close.style.height = '30px';
-    close.style.border = '1px solid rgba(255, 255, 255, 0.18)';
-    close.style.borderRadius = '8px';
-    close.style.background = '#2b2d31';
-    close.style.color = '#f2f3f5';
-    close.style.cursor = 'pointer';
-    close.style.font = '20px/1 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-    close.style.boxShadow = '0 8px 24px rgba(0, 0, 0, 0.24)';
-    close.style.zIndex = '1';
-    close.addEventListener('click', closePanel);
-
-    root.append(frame, close);
+    root.append(frame);
     applyPanelSide(root, normalized);
     applyPanelTheme(root, frame, theme);
     document.documentElement.append(root);
@@ -216,6 +188,15 @@
       return Promise.resolve(setPanelVisibility(Boolean(message.hidden)));
     }
     return undefined;
+  });
+
+  window.addEventListener('message', (event) => {
+    if (!panel || event.source !== panel.frame.contentWindow) {
+      return;
+    }
+    if (event.data?.source === MESSAGE_SOURCE && event.data?.type === MESSAGE_CLOSE_PANEL) {
+      closePanel();
+    }
   });
 
   browser.storage?.onChanged?.addListener((changes, areaName) => {

@@ -11,6 +11,8 @@ import { applyTheme } from '../shared/theme.js';
 import { nextHistoryPanelState } from './selection.js';
 
 const DETAIL_CLOSE_MS = 220;
+const PANEL_MESSAGE_SOURCE = 'tab-ocr-translate';
+const isPanelSurface = new URLSearchParams(location.search).get('surface') === 'panel';
 let detailCloseTimer = null;
 
 const state = {
@@ -29,6 +31,7 @@ const state = {
 const elements = {
   keyStatus: document.querySelector('#key-status'),
   openOptions: document.querySelector('#open-options'),
+  closePanel: document.querySelector('#close-panel'),
   latestResult: document.querySelector('#latest-result'),
   copyLatest: document.querySelector('#copy-latest'),
   search: document.querySelector('#search'),
@@ -38,6 +41,8 @@ const elements = {
   clearNonFavorites: document.querySelector('#clear-non-favorites'),
   clearAll: document.querySelector('#clear-all')
 };
+
+document.documentElement.dataset.surface = isPanelSurface ? 'panel' : 'page';
 
 function send(type, payload = {}) {
   return browser.runtime.sendMessage({ type, ...payload });
@@ -401,6 +406,13 @@ async function copyText(text) {
 }
 
 elements.openOptions.addEventListener('click', () => send(MESSAGES.OPEN_OPTIONS));
+elements.closePanel.hidden = !isPanelSurface;
+elements.closePanel.addEventListener('click', () => {
+  window.parent.postMessage({
+    source: PANEL_MESSAGE_SOURCE,
+    type: MESSAGES.CLOSE_PANEL
+  }, '*');
+});
 elements.copyLatest.addEventListener('click', () => copyText(state.history[0]?.translation?.text));
 elements.search.addEventListener('input', (event) => {
   state.filters.query = event.target.value;

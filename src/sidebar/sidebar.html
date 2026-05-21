@@ -9,11 +9,14 @@
   </head>
   <body>
     <header class="topbar">
-      <div>
+      <div class="topbar-title">
         <h1>OCR Translate</h1>
         <p id="key-status" class="muted">Checking settings...</p>
       </div>
-      <button id="open-options" class="icon-button" type="button" title="Settings" aria-label="Settings">Settings</button>
+      <div class="topbar-actions">
+        <button id="open-options" class="icon-button" type="button" title="Settings" aria-label="Settings">Settings</button>
+        <button id="close-panel" class="icon-button panel-close-button" type="button" title="Close panel" aria-label="Close panel" hidden>X</button>
+      </div>
     </header>
 
     <main class="layout">
