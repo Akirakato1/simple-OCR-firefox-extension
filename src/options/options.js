@@ -1,6 +1,7 @@
 import { MESSAGES, SETTINGS_KEY } from '../shared/constants.js';
 import { languageName, targetLanguageOptions } from '../shared/languages.js';
 import { normalizeSettings } from '../shared/settings.js';
+import { applyTheme, themeLabel, THEME_OPTIONS } from '../shared/theme.js';
 
 const form = document.querySelector('#settings-form');
 const status = document.querySelector('#status');
@@ -10,6 +11,7 @@ const fields = {
   ocrSpaceApiKey: document.querySelector('#ocr-key'),
   googleTranslateApiKey: document.querySelector('#google-key'),
   targetLanguage: document.querySelector('#target-language'),
+  theme: document.querySelector('#theme'),
   imageQuality: document.querySelector('#image-quality'),
   maxUploadBytes: document.querySelector('#max-upload-bytes'),
   saveOriginalCrop: document.querySelector('#save-original'),
@@ -26,12 +28,24 @@ function populateTargetLanguageOptions() {
   }
 }
 
+function populateThemeOptions() {
+  fields.theme.innerHTML = '';
+  for (const theme of THEME_OPTIONS) {
+    const option = document.createElement('option');
+    option.value = theme.value;
+    option.textContent = theme.label;
+    fields.theme.append(option);
+  }
+}
+
 async function loadSettings() {
   const data = await browser.storage.local.get(SETTINGS_KEY);
   const settings = normalizeSettings(data[SETTINGS_KEY]);
+  applyTheme(document.documentElement, settings.theme);
   fields.ocrSpaceApiKey.value = settings.ocrSpaceApiKey;
   fields.googleTranslateApiKey.value = settings.googleTranslateApiKey;
   fields.targetLanguage.value = settings.targetLanguage;
+  fields.theme.value = settings.theme;
   fields.imageQuality.value = settings.imageQuality;
   fields.maxUploadBytes.value = settings.maxUploadBytes;
   fields.saveOriginalCrop.checked = settings.saveOriginalCrop;
@@ -43,6 +57,7 @@ function readForm() {
     ocrSpaceApiKey: fields.ocrSpaceApiKey.value,
     googleTranslateApiKey: fields.googleTranslateApiKey.value,
     targetLanguage: fields.targetLanguage.value,
+    theme: fields.theme.value,
     imageQuality: Number(fields.imageQuality.value),
     maxUploadBytes: Number(fields.maxUploadBytes.value),
     saveOriginalCrop: fields.saveOriginalCrop.checked,
@@ -54,12 +69,13 @@ form.addEventListener('submit', async (event) => {
   event.preventDefault();
   const settings = readForm();
   await browser.storage.local.set({ [SETTINGS_KEY]: settings });
+  applyTheme(document.documentElement, settings.theme);
   try {
     await browser.runtime.sendMessage({ type: MESSAGES.SETTINGS_CHANGED });
   } catch (_) {
     // The sidebar may not be open while settings are saved.
   }
-  status.textContent = `Saved. Target language: ${languageName(settings.targetLanguage)}`;
+  status.textContent = `Saved. Target language: ${languageName(settings.targetLanguage)}. Theme: ${themeLabel(settings.theme)}`;
 });
 
 openShortcuts.addEventListener('click', async () => {
@@ -72,4 +88,5 @@ openShortcuts.addEventListener('click', async () => {
 });
 
 populateTargetLanguageOptions();
+populateThemeOptions();
 loadSettings();

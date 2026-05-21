@@ -1,4 +1,5 @@
 import { DEFAULT_SETTINGS } from './constants.js';
+import { normalizeThemePreference } from './theme.js';
 
 export function normalizeSettings(value = {}) {
   const merged = { ...DEFAULT_SETTINGS, ...value };
@@ -15,7 +16,8 @@ export function normalizeSettings(value = {}) {
     imageQuality: quality > 0 && quality <= 1 ? quality : DEFAULT_SETTINGS.imageQuality,
     maxUploadBytes: Number.isInteger(maxUploadBytes) && maxUploadBytes > 0 ? maxUploadBytes : DEFAULT_SETTINGS.maxUploadBytes,
     saveOriginalCrop: Boolean(merged.saveOriginalCrop),
-    maxHistoryEntries: Number.isInteger(maxHistoryEntries) && maxHistoryEntries > 0 ? maxHistoryEntries : DEFAULT_SETTINGS.maxHistoryEntries
+    maxHistoryEntries: Number.isInteger(maxHistoryEntries) && maxHistoryEntries > 0 ? maxHistoryEntries : DEFAULT_SETTINGS.maxHistoryEntries,
+    theme: normalizeThemePreference(merged.theme)
   };
 }
 

@@ -7,12 +7,17 @@ import {
   normalizeLanguageCode
 } from '../shared/languages.js';
 import { hasRequiredApiKeys, normalizeSettings } from '../shared/settings.js';
-import { nextSelectedHistoryId } from './selection.js';
+import { applyTheme } from '../shared/theme.js';
+import { nextHistoryPanelState } from './selection.js';
+
+const DETAIL_CLOSE_MS = 220;
+let detailCloseTimer = null;
 
 const state = {
   history: [],
   settings: normalizeSettings(),
   selectedId: null,
+  closingId: null,
   countryQuery: '',
   filters: {
     query: '',
@@ -30,8 +35,6 @@ const elements = {
   languageFilter: document.querySelector('#language-filter'),
   favoritesOnly: document.querySelector('#favorites-only'),
   historyList: document.querySelector('#history-list'),
-  detailView: document.querySelector('#detail-view'),
-  detailActions: document.querySelector('#detail-actions'),
   clearNonFavorites: document.querySelector('#clear-non-favorites'),
   clearAll: document.querySelector('#clear-all')
 };
@@ -44,7 +47,13 @@ async function loadState() {
   const data = await browser.storage.local.get([HISTORY_KEY, SETTINGS_KEY]);
   state.history = Array.isArray(data[HISTORY_KEY]) ? data[HISTORY_KEY] : [];
   state.settings = normalizeSettings(data[SETTINGS_KEY]);
-  state.selectedId ||= state.history[0]?.id || null;
+  applyTheme(document.documentElement, state.settings.theme);
+  if (!state.history.some((entry) => entry.id === state.selectedId)) {
+    state.selectedId = null;
+  }
+  if (!state.history.some((entry) => entry.id === state.closingId)) {
+    state.closingId = null;
+  }
   render();
 }
 
@@ -116,6 +125,49 @@ function uniqueLanguages(history) {
   return [...languages.entries()].sort((a, b) => a[1].localeCompare(b[1]));
 }
 
+function detailPanelId(entry) {
+  return `detail-${entry.id}`;
+}
+
+function clearDetailCloseTimer() {
+  if (detailCloseTimer) {
+    clearTimeout(detailCloseTimer);
+    detailCloseTimer = null;
+  }
+}
+
+function scheduleClosingPanelRemoval(id) {
+  clearDetailCloseTimer();
+  detailCloseTimer = setTimeout(() => {
+    if (state.closingId === id) {
+      state.closingId = null;
+      render();
+    }
+  }, DETAIL_CLOSE_MS);
+}
+
+function selectHistoryEntry(id) {
+  const next = nextHistoryPanelState({
+    selectedId: state.selectedId,
+    closingId: state.closingId
+  }, id);
+
+  if (next.selectedId !== state.selectedId || next.closingId) {
+    state.countryQuery = '';
+  }
+
+  state.selectedId = next.selectedId;
+  state.closingId = next.closingId;
+
+  if (state.closingId) {
+    scheduleClosingPanelRemoval(state.closingId);
+  } else {
+    clearDetailCloseTimer();
+  }
+
+  render();
+}
+
 function renderFilters() {
   const current = elements.languageFilter.value;
   elements.languageFilter.innerHTML = '<option value="">Any language</option>';
@@ -141,12 +193,25 @@ function renderHistoryList() {
   }
 
   for (const entry of filtered) {
+    const isExpanded = entry.id === state.selectedId;
+    const isClosing = entry.id === state.closingId && !isExpanded;
+    const item = document.createElement('article');
+    item.className = 'history-entry';
+    item.dataset.id = entry.id;
+    if (isExpanded) {
+      item.classList.add('is-expanded');
+    }
+    if (isClosing) {
+      item.classList.add('is-closing');
+    }
+
     const button = document.createElement('button');
     button.type = 'button';
     button.className = 'history-item';
     button.dataset.id = entry.id;
-    button.setAttribute('aria-selected', String(entry.id === state.selectedId));
-    button.setAttribute('aria-expanded', String(entry.id === state.selectedId));
+    button.setAttribute('aria-selected', String(isExpanded));
+    button.setAttribute('aria-expanded', String(isExpanded));
+    button.setAttribute('aria-controls', detailPanelId(entry));
 
     const image = document.createElement('img');
     image.className = 'thumb';
@@ -180,15 +245,14 @@ function renderHistoryList() {
 
     main.append(title, source, meta);
     button.append(image, main);
-    button.addEventListener('click', () => {
-      const nextSelectedId = nextSelectedHistoryId(state.selectedId, entry.id);
-      if (nextSelectedId !== state.selectedId) {
-        state.countryQuery = '';
-      }
-      state.selectedId = nextSelectedId;
-      render();
-    });
-    elements.historyList.append(button);
+    button.addEventListener('click', () => selectHistoryEntry(entry.id));
+    item.append(button);
+
+    if (isExpanded || isClosing) {
+      item.append(historyDetailPanel(entry, { closing: isClosing }));
+    }
+
+    elements.historyList.append(item);
   }
 }
 
@@ -250,18 +314,10 @@ function countrySearch(entry) {
   return section;
 }
 
-function renderDetails() {
-  const entry = state.history.find((item) => item.id === state.selectedId);
-  elements.detailActions.innerHTML = '';
-  elements.detailView.innerHTML = '';
+function entryDetailActions(entry) {
+  const actions = document.createElement('div');
+  actions.className = 'entry-detail-actions button-row';
 
-  if (!entry) {
-    elements.detailView.className = 'detail-view empty';
-    elements.detailView.textContent = 'Select a history entry.';
-    return;
-  }
-
-  elements.detailView.className = 'detail-view';
   const favorite = document.createElement('button');
   favorite.type = 'button';
   favorite.textContent = entry.favorite ? 'Unfavorite' : 'Favorite';
@@ -285,7 +341,22 @@ function renderDetails() {
   remove.textContent = 'Delete';
   remove.addEventListener('click', () => send(MESSAGES.DELETE_ENTRY, { id: entry.id }));
 
-  elements.detailActions.append(favorite, retryTranslation, retryOcr, remove);
+  actions.append(favorite, retryTranslation, retryOcr, remove);
+  return actions;
+}
+
+function historyDetailPanel(entry, { closing = false } = {}) {
+  const panel = document.createElement('section');
+  panel.id = detailPanelId(entry);
+  panel.className = 'entry-detail-panel';
+  panel.setAttribute('role', 'region');
+  panel.setAttribute('aria-label', `Details for ${textPreview(entry)}`);
+  if (closing) {
+    panel.classList.add('is-closing');
+  }
+
+  const inner = document.createElement('div');
+  inner.className = 'entry-detail-inner';
 
   const grid = document.createElement('div');
   grid.className = 'detail-grid';
@@ -310,7 +381,9 @@ function renderDetails() {
     textarea('Translation', entry.translation?.text),
     textarea('Error', entry.error?.message)
   );
-  elements.detailView.append(grid);
+  inner.append(entryDetailActions(entry), grid);
+  panel.append(inner);
+  return panel;
 }
 
 function render() {
@@ -318,7 +391,6 @@ function render() {
   renderLatest();
   renderFilters();
   renderHistoryList();
-  renderDetails();
 }
 
 async function copyText(text) {

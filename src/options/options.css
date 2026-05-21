@@ -21,6 +21,28 @@
   }
 }
 
+:root[data-theme="light"] {
+  color-scheme: light;
+  --bg: #f7f8fa;
+  --panel: #ffffff;
+  --text: #18212b;
+  --muted: #627080;
+  --line: #d9e1ea;
+  --accent: #1769aa;
+  --danger: #b23b3b;
+}
+
+:root[data-theme="discord-dark"] {
+  color-scheme: dark;
+  --bg: #313338;
+  --panel: #2b2d31;
+  --text: #f2f3f5;
+  --muted: #b5bac1;
+  --line: #1e1f22;
+  --accent: #5865f2;
+  --danger: #f23f42;
+}
+
 * {
   box-sizing: border-box;
 }

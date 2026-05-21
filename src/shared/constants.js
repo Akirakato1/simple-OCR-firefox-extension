@@ -6,7 +6,8 @@ export const DEFAULT_SETTINGS = Object.freeze({
   imageQuality: 0.82,
   maxUploadBytes: 1_000_000,
   saveOriginalCrop: false,
-  maxHistoryEntries: 100
+  maxHistoryEntries: 100,
+  theme: 'system'
 });
 
 export const HISTORY_KEY = 'history';
