@@ -24,6 +24,7 @@
     "src/sidebar/sidebar.css",
     "src/sidebar/sidebar.js",
     "src/sidebar/selection.js",
+    "src/sidebar/theme-bootstrap.js",
     "src/shared/constants.js",
     "src/shared/history.js",
     "src/shared/languages.js",

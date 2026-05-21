@@ -9,7 +9,7 @@
   const MESSAGE_SET_PANEL_VISIBILITY = 'set-panel-visibility';
   const SETTINGS_KEY = 'settings';
   const PANEL_ID = 'tab-ocr-translate-panel-root';
-  const PANEL_URL = 'src/sidebar/sidebar.html?surface=panel';
+  const PANEL_PATH = 'src/sidebar/sidebar.html';
   const OPEN_TRANSITION_MS = 180;
 
   let panel = null;
@@ -34,6 +34,14 @@
       return '#313338';
     }
     return window.matchMedia?.('(prefers-color-scheme: dark)').matches ? '#313338' : '#f7f8fa';
+  }
+
+  function panelUrl(theme) {
+    const params = new URLSearchParams({
+      surface: 'panel',
+      theme: normalizePanelTheme(theme)
+    });
+    return `${PANEL_PATH}?${params.toString()}`;
   }
 
   function closedTransform(side) {
@@ -67,6 +75,20 @@
     if (frame) {
       frame.style.background = background;
     }
+  }
+
+  function revealPanel(root, frame) {
+    requestAnimationFrame(() => {
+      if (panel?.root === root) {
+        root.style.visibility = 'visible';
+        frame.style.opacity = '1';
+        requestAnimationFrame(() => {
+          if (panel?.root === root) {
+            root.style.transform = 'translateX(0)';
+          }
+        });
+      }
+    });
   }
 
   function removeClosingPanel() {
@@ -110,12 +132,15 @@
 
     const frame = document.createElement('iframe');
     frame.title = 'OCR Translate';
-    frame.src = browser.runtime.getURL(PANEL_URL);
     frame.style.display = 'block';
     frame.style.width = '100%';
     frame.style.height = '100%';
     frame.style.border = '0';
     frame.style.background = panelBackgroundColor(theme);
+    frame.style.opacity = '0';
+    frame.style.transition = 'opacity 90ms ease';
+    frame.addEventListener('load', () => revealPanel(root, frame), { once: true });
+    frame.src = browser.runtime.getURL(panelUrl(theme));
 
     const close = document.createElement('button');
     close.type = 'button';
@@ -142,17 +167,6 @@
     applyPanelTheme(root, frame, theme);
     document.documentElement.append(root);
     panel = { root, frame };
-
-    requestAnimationFrame(() => {
-      if (panel?.root === root) {
-        root.style.visibility = 'visible';
-        requestAnimationFrame(() => {
-          if (panel?.root === root) {
-            root.style.transform = 'translateX(0)';
-          }
-        });
-      }
-    });
 
     return { ok: true };
   }

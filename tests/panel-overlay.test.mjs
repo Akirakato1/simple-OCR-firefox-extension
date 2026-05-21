@@ -11,6 +11,7 @@ function createElement(tagName) {
     style: {},
     parentNode: null,
     attributes: {},
+    listeners: {},
     setAttribute(name, value) {
       this.attributes[name] = String(value);
     },
@@ -27,7 +28,12 @@ function createElement(tagName) {
       this.parentNode.children = this.parentNode.children.filter((child) => child !== this);
       this.parentNode = null;
     },
-    addEventListener() {},
+    addEventListener(type, listener) {
+      this.listeners[type] = listener;
+    },
+    dispatchEvent(event) {
+      this.listeners[event.type]?.(event);
+    },
     querySelector(selector) {
       if (selector !== '[data-tab-ocr-close]') {
         return null;
@@ -85,6 +91,7 @@ async function loadOverlay() {
     requestAnimationFrame(callback) {
       rafCallbacks.push(callback);
     },
+    URLSearchParams,
     clearTimeout,
     setTimeout
   };
@@ -123,10 +130,19 @@ test('panel overlay starts hidden offscreen with no edge border or white dark-mo
   assert.equal(overlay.root.style.borderRight, '0');
   assert.equal(overlay.root.style.background, '#313338');
   assert.equal(overlay.root.children[0].style.background, '#313338');
+  assert.equal(overlay.root.children[0].style.opacity, '0');
+  assert.match(overlay.root.children[0].src, /theme=discord-dark/);
+
+  overlay.runAnimationFrame();
+  assert.equal(overlay.root.style.visibility, 'hidden');
+  assert.equal(overlay.root.style.transform, 'translateX(100%)');
+
+  overlay.root.children[0].dispatchEvent({ type: 'load' });
+  assert.equal(overlay.root.style.visibility, 'hidden');
 
   overlay.runAnimationFrame();
   assert.equal(overlay.root.style.visibility, 'visible');
-  assert.equal(overlay.root.style.transform, 'translateX(100%)');
+  assert.equal(overlay.root.children[0].style.opacity, '1');
 
   overlay.runAnimationFrame();
   assert.equal(overlay.root.style.transform, 'translateX(0)');

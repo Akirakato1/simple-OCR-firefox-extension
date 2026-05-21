@@ -14,6 +14,7 @@ assert.equal(manifest.background.type, 'module');
 assert.ok(manifest.web_accessible_resources.includes('src/sidebar/sidebar.html'));
 assert.ok(manifest.web_accessible_resources.includes('src/sidebar/sidebar.css'));
 assert.ok(manifest.web_accessible_resources.includes('src/sidebar/sidebar.js'));
+assert.ok(manifest.web_accessible_resources.includes('src/sidebar/theme-bootstrap.js'));
 assert.ok(manifest.permissions.includes('activeTab'));
 assert.ok(manifest.permissions.includes('tabs'));
 assert.ok(manifest.permissions.includes('storage'));
