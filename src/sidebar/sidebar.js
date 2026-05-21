@@ -1,6 +1,7 @@
 import { HISTORY_KEY, MESSAGES, SETTINGS_KEY, STATUS } from '../shared/constants.js';
 import { filterHistory } from '../shared/history.js';
 import { hasRequiredApiKeys, normalizeSettings } from '../shared/settings.js';
+import { nextSelectedHistoryId } from './selection.js';
 
 const state = {
   history: [],
@@ -127,6 +128,7 @@ function renderHistoryList() {
     button.className = 'history-item';
     button.dataset.id = entry.id;
     button.setAttribute('aria-selected', String(entry.id === state.selectedId));
+    button.setAttribute('aria-expanded', String(entry.id === state.selectedId));
 
     const image = document.createElement('img');
     image.className = 'thumb';
@@ -161,7 +163,7 @@ function renderHistoryList() {
     main.append(title, source, meta);
     button.append(image, main);
     button.addEventListener('click', () => {
-      state.selectedId = entry.id;
+      state.selectedId = nextSelectedHistoryId(state.selectedId, entry.id);
       render();
     });
     elements.historyList.append(button);
