@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>OCR Translate</title>
+    <link rel="stylesheet" href="sidebar.css">
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <h1>OCR Translate</h1>
+        <p id="key-status" class="muted">Checking settings...</p>
+      </div>
+      <button id="open-options" class="icon-button" type="button" title="Settings" aria-label="Settings">Settings</button>
+    </header>
+
+    <main class="layout">
+      <section class="latest" aria-labelledby="latest-title">
+        <div class="section-header">
+          <h2 id="latest-title">Latest</h2>
+          <button id="copy-latest" class="ghost-button" type="button">Copy Translation</button>
+        </div>
+        <div id="latest-result" class="latest-body empty">No captures yet.</div>
+      </section>
+
+      <section class="filters" aria-label="History filters">
+        <input id="search" type="search" placeholder="Search text, URL, language">
+        <select id="language-filter" aria-label="Detected language">
+          <option value="">Any language</option>
+        </select>
+        <label class="check-row">
+          <input id="favorites-only" type="checkbox">
+          Favorites
+        </label>
+      </section>
+
+      <section class="history-section" aria-labelledby="history-title">
+        <div class="section-header">
+          <h2 id="history-title">History</h2>
+          <div class="button-row">
+            <button id="clear-non-favorites" class="ghost-button" type="button">Clear Non-Favorites</button>
+            <button id="clear-all" class="danger-button" type="button">Clear All</button>
+          </div>
+        </div>
+        <div id="history-list" class="history-list"></div>
+      </section>
+
+      <section class="detail" aria-labelledby="detail-title">
+        <div class="section-header">
+          <h2 id="detail-title">Details</h2>
+          <div id="detail-actions" class="button-row"></div>
+        </div>
+        <div id="detail-view" class="detail-view empty">Select a history entry.</div>
+      </section>
+    </main>
+
+    <script type="module" src="sidebar.js"></script>
+  </body>
+</html>

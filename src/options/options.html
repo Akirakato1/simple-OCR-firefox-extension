@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>OCR Translate Settings</title>
+    <link rel="stylesheet" href="options.css">
+  </head>
+  <body>
+    <main class="settings">
+      <header>
+        <h1>OCR Translate Settings</h1>
+        <p id="status" class="muted">Add your personal OCR.space and DeepL API keys.</p>
+      </header>
+
+      <form id="settings-form">
+        <section>
+          <h2>API Keys</h2>
+          <label>
+            OCR.space API key
+            <input id="ocr-key" name="ocrSpaceApiKey" type="password" autocomplete="off">
+          </label>
+          <label>
+            DeepL API key
+            <input id="deepl-key" name="deeplApiKey" type="password" autocomplete="off">
+          </label>
+        </section>
+
+        <section>
+          <h2>Translation</h2>
+          <label>
+            Target language
+            <input id="target-language" name="targetLanguage" type="text" maxlength="8" value="EN">
+          </label>
+        </section>
+
+        <section>
+          <h2>Image Handling</h2>
+          <label>
+            JPEG quality
+            <input id="image-quality" name="imageQuality" type="number" min="0.35" max="1" step="0.01">
+          </label>
+          <label>
+            Max upload bytes
+            <input id="max-upload-bytes" name="maxUploadBytes" type="number" min="100000" step="10000">
+          </label>
+          <label class="check-row">
+            <input id="save-original" name="saveOriginalCrop" type="checkbox">
+            Save original crop in history
+          </label>
+        </section>
+
+        <section>
+          <h2>History</h2>
+          <label>
+            Max history entries
+            <input id="max-history" name="maxHistoryEntries" type="number" min="1" step="1">
+          </label>
+        </section>
+
+        <footer class="actions">
+          <button type="submit" class="primary">Save Settings</button>
+          <button id="open-shortcuts" type="button">Open Shortcut Settings</button>
+        </footer>
+      </form>
+    </main>
+    <script type="module" src="options.js"></script>
+  </body>
+</html>
