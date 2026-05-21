@@ -1,0 +1,42 @@
+{
+  "manifest_version": 2,
+  "name": "Tab OCR Translate",
+  "version": "0.1.0",
+  "description": "Select a browser-tab region, OCR it with OCR.space, translate it with DeepL, and manage results in a sidebar.",
+  "permissions": [
+    "activeTab",
+    "tabs",
+    "storage",
+    "https://api.ocr.space/*",
+    "https://api-free.deepl.com/*"
+  ],
+  "background": {
+    "scripts": ["src/background/background.js"],
+    "persistent": false,
+    "type": "module"
+  },
+  "sidebar_action": {
+    "default_title": "OCR Translate",
+    "default_panel": "src/sidebar/sidebar.html",
+    "open_at_install": true
+  },
+  "options_ui": {
+    "page": "src/options/options.html",
+    "open_in_tab": true
+  },
+  "commands": {
+    "start-ocr-capture": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+Y",
+        "mac": "Command+Shift+Y"
+      },
+      "description": "Select a tab region for OCR and translation"
+    }
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "tab-ocr-translate@example.local",
+      "strict_min_version": "109.0"
+    }
+  }
+}
