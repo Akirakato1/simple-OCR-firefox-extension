@@ -46,8 +46,13 @@ form.addEventListener('submit', async (event) => {
   status.textContent = `Saved. Target language: ${settings.targetLanguage}`;
 });
 
-openShortcuts.addEventListener('click', () => {
-  browser.runtime.sendMessage({ type: MESSAGES.OPEN_SHORTCUTS });
+openShortcuts.addEventListener('click', async () => {
+  const response = await browser.runtime.sendMessage({ type: MESSAGES.OPEN_SHORTCUTS });
+  if (response?.ok) {
+    status.textContent = 'Opened Firefox extension shortcut settings.';
+    return;
+  }
+  status.textContent = response?.error || 'Could not open shortcut settings. Open about:addons and choose Manage Extension Shortcuts.';
 });
 
 loadSettings();

@@ -12,6 +12,7 @@ import { runDeepL } from '../shared/providers/deepl.js';
 import { runOcrSpace } from '../shared/providers/ocr-space.js';
 import { hasRequiredApiKeys, normalizeSettings } from '../shared/settings.js';
 import { cropAndCompressSelection } from './capture.js';
+import { openExtensionShortcutSettings } from './shortcuts.js';
 
 const CAPTURE_COMMAND = 'start-ocr-capture';
 const OVERLAY_FILE = '/src/content/selection-overlay.js';
@@ -310,11 +311,7 @@ async function retryOcr(id) {
 }
 
 async function openShortcutSettings() {
-  try {
-    await browser.tabs.create({ url: 'about:addons' });
-  } catch (_) {
-    await openOptionsPage();
-  }
+  return openExtensionShortcutSettings(browser);
 }
 
 browser.runtime.onInstalled.addListener(async ({ reason }) => {
