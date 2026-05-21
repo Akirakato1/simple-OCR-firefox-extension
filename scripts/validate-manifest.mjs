@@ -13,7 +13,7 @@ assert.ok(manifest.permissions.includes('activeTab'));
 assert.ok(manifest.permissions.includes('tabs'));
 assert.ok(manifest.permissions.includes('storage'));
 assert.ok(manifest.permissions.includes('https://api.ocr.space/*'));
-assert.ok(manifest.permissions.includes('https://api-free.deepl.com/*'));
+assert.ok(manifest.permissions.includes('https://translation.googleapis.com/*'));
 assert.ok(manifest.commands['start-ocr-capture']);
 
 console.log('manifest ok');

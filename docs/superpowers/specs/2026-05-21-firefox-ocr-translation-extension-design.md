@@ -2,7 +2,7 @@
 
 ## Overview
 
-Build a personal-use Firefox WebExtension that lets the user press a configurable hotkey, select a region inside the current browser tab, OCR the selected image through OCR.space, translate the recognized text through DeepL, and review the result in a Firefox sidebar. The extension ships without API keys; the user supplies their own OCR.space and DeepL keys during first-run setup.
+Build a personal-use Firefox WebExtension that lets the user press a configurable hotkey, select a region inside the current browser tab, OCR the selected image through OCR.space, translate the recognized text through Google Cloud Translation, and review the result in a Firefox sidebar. The extension ships without API keys; the user supplies their own OCR.space and Google Cloud Translation keys during first-run setup.
 
 The initial product is a no-backend extension. API keys are stored locally in the browser extension storage and used directly by the extension. This is appropriate for personal use, but not for a public release where keys must be protected by a backend proxy.
 
@@ -14,11 +14,11 @@ The initial product is a no-backend extension. API keys are stored locally in th
 - Crop and compress the selected region before OCR.
 - Keep OCR.space free-tier compatibility by defaulting to small compressed crops and retrying compression/downscale when needed.
 - Send the selected crop to OCR.space for OCR and language detection where available.
-- Send OCR text to DeepL for automatic translation into a configurable target language, defaulting to English.
+- Send OCR text to Google Cloud Translation for automatic translation into a configurable target language, defaulting to English.
 - Open or focus the sidebar automatically after capture.
 - Store history entries with thumbnail, OCR text, detected language, translation, timestamp, source page metadata, favorite flag, and retry status.
 - Let the user search, inspect, favorite, delete, retry, and manage history from the sidebar.
-- Ask for user-owned OCR.space and DeepL API keys on install or first use.
+- Ask for user-owned OCR.space and Google Cloud Translation API keys on install or first use.
 
 ## Non-Goals
 
@@ -39,11 +39,11 @@ The default OCR request uses `OCREngine=3` with `language=auto` so screenshots c
 
 Reference: https://ocr.space/OCRAPI
 
-### DeepL
+### Google Cloud Translation
 
-The extension uses DeepL API for translation. The user's own DeepL API key is required. DeepL API Free currently provides a monthly character allowance suitable for personal usage.
+The extension uses Google Cloud Translation Basic v2 for translation. The user's own Google Cloud API key is required. Google Cloud Translation currently provides a monthly free character allowance suitable for personal usage.
 
-Reference: https://support.deepl.com/hc/en-us/articles/360021200939-DeepL-API-Free
+Reference: https://cloud.google.com/translate/docs/basic/translating-text
 
 ## Firefox WebExtension Capabilities
 
@@ -54,7 +54,7 @@ The design uses standard Firefox WebExtension APIs:
 - `tabs.captureVisibleTab()` for capturing the visible area of the active tab.
 - `storage.local` for settings and history.
 - Content scripts for the in-tab selection overlay.
-- Host permissions for OCR.space and DeepL API endpoints.
+- Host permissions for OCR.space and Google Cloud Translation API endpoints.
 
 References:
 
@@ -67,7 +67,7 @@ References:
 
 ### Background Script
 
-The background script owns orchestration. It listens for the capture command, verifies settings, opens or focuses the sidebar, injects or messages the selection overlay in the active tab, captures the visible tab image, crops and compresses the selected rectangle, calls OCR.space, calls DeepL, and writes result records to storage.
+The background script owns orchestration. It listens for the capture command, verifies settings, opens or focuses the sidebar, injects or messages the selection overlay in the active tab, captures the visible tab image, crops and compresses the selected rectangle, calls OCR.space, calls Google Cloud Translation, and writes result records to storage.
 
 The background script also handles retry requests from the sidebar. OCR retry reuses the saved thumbnail or original crop when available; if only the thumbnail is available and OCR quality may suffer, the UI explains that recapturing is recommended. Translation retry reuses saved OCR text.
 
@@ -89,7 +89,7 @@ The module always creates a thumbnail for history. It saves the full original cr
 
 The OCR.space client submits the compressed crop with the user's API key and parses OCR text, detected language data where available, and provider errors.
 
-The DeepL client submits OCR text with the user's API key and selected target language. It parses translated text and detected source language when DeepL returns it. If OCR.space and DeepL report different source languages, the sidebar shows both only if useful. The top-level `detectedLanguage` field prefers DeepL's source language for translated text and keeps OCR metadata separately.
+The Google Cloud Translation client submits OCR text with the user's API key and selected target language. It parses translated text and detected source language when Google returns it. If OCR.space and Google report different source languages, the sidebar shows both only if useful. The top-level `detectedLanguage` field prefers Google's source language for translated text and keeps OCR metadata separately.
 
 ### Sidebar UI
 
@@ -105,7 +105,7 @@ The sidebar updates automatically when a new capture result is saved.
 
 ### Options Page
 
-The options page provides first-run setup and a larger settings surface. On install, or when capture is attempted without required API keys, the extension opens this page and asks the user to enter OCR.space and DeepL API keys.
+The options page provides first-run setup and a larger settings surface. On install, or when capture is attempted without required API keys, the extension opens this page and asks the user to enter OCR.space and Google Cloud Translation API keys.
 
 The options page also includes a shortcut settings button that opens Firefox's extension shortcut settings when supported.
 
@@ -116,7 +116,7 @@ The options page also includes a shortcut settings button that opens Firefox's e
 ```json
 {
   "ocrSpaceApiKey": "string",
-  "deeplApiKey": "string",
+  "googleTranslateApiKey": "string",
   "targetLanguage": "EN",
   "imageFormat": "image/jpeg",
   "imageQuality": 0.82,
@@ -170,13 +170,13 @@ History entries are stored newest first. When `maxHistoryEntries` is exceeded, t
 
 1. User installs extension.
 2. Extension opens options page because API keys are missing.
-3. User enters OCR.space and DeepL API keys and saves settings.
+3. User enters OCR.space and Google Cloud Translation API keys and saves settings.
 4. User presses the configured capture shortcut on a browser tab.
 5. Extension shows region-selection overlay on the active tab.
 6. User drags a rectangle over visible tab content.
 7. Extension captures visible tab, crops the selected rectangle, compresses it, and creates a thumbnail.
 8. Extension calls OCR.space with the compressed crop.
-9. Extension calls DeepL with OCR text and target language.
+9. Extension calls Google Cloud Translation with OCR text and target language.
 10. Extension opens or focuses the sidebar.
 11. Sidebar shows the latest result and saves it in history.
 12. User can copy OCR text or translation, favorite the entry, delete it, retry failed stages, or inspect previous history.
@@ -189,12 +189,12 @@ History entries are stored newest first. When `maxHistoryEntries` is exceeded, t
 - Crop too large: recompress, downscale, then show a size error if still above `maxUploadBytes`.
 - OCR.space rate limit or API error: save an `ocr_failed` entry with retry button.
 - Empty OCR text: save result with thumbnail and a message that no text was detected.
-- DeepL API error: save OCR result with `translation_failed` status and retry button.
+- Google Cloud Translation API error: save OCR result with `translation_failed` status and retry button.
 - Storage quota error: ask user to delete old entries or reduce saved images.
 
 ## Security And Privacy
 
-The extension sends selected image crops to OCR.space and recognized text to DeepL. It does not upload entire pages unless the user selects an entire visible tab area.
+The extension sends selected image crops to OCR.space and recognized text to Google Cloud Translation. It does not upload entire pages unless the user selects an entire visible tab area.
 
 API keys are stored locally in `storage.local`. This avoids shipping any API key with the extension, but local extension storage is not a secure secret vault. This is acceptable for a personal extension and should be revisited before public distribution.
 
@@ -206,7 +206,7 @@ The extension requests only the permissions needed for the MVP: active tab captu
 
 - Settings validation:
   - missing OCR.space key blocks capture and opens settings.
-  - missing DeepL key blocks translation setup.
+  - missing Google Cloud Translation key blocks translation setup.
   - invalid image quality falls back to default.
 - Crop/compression:
   - crops the expected rectangle from a known image.
@@ -217,7 +217,7 @@ The extension requests only the permissions needed for the MVP: active tab captu
   - parses successful OCR responses.
   - parses empty text responses.
   - surfaces rate limit and API-key errors.
-- DeepL client:
+- Google Cloud Translation client:
   - parses successful translation responses.
   - handles detected source language.
   - surfaces quota and API-key errors.
@@ -232,7 +232,7 @@ The extension requests only the permissions needed for the MVP: active tab captu
 
 - Install extension in Firefox with `web-ext`.
 - Confirm first-run setup opens when API keys are missing.
-- Save OCR.space and DeepL keys.
+- Save OCR.space and Google Cloud Translation keys.
 - Trigger capture using the default shortcut.
 - Draw a region inside a normal web page and confirm automatic sidebar result.
 - Press `Esc` during selection and confirm no history entry is created.
@@ -246,7 +246,7 @@ The extension requests only the permissions needed for the MVP: active tab captu
 ## Open Decisions Resolved
 
 - OCR provider: OCR.space.
-- Translation provider: DeepL.
+- Translation provider: Google Cloud Translation.
 - Capture scope: current browser tab only.
 - API-key model: user-owned keys stored locally, no backend.
 - Result behavior: automatic translation with retry.

@@ -10,7 +10,7 @@
     <main class="settings">
       <header>
         <h1>OCR Translate Settings</h1>
-        <p id="status" class="muted">Add your personal OCR.space and DeepL API keys.</p>
+        <p id="status" class="muted">Add your personal OCR.space and Google Translation API keys.</p>
       </header>
 
       <form id="settings-form">
@@ -21,8 +21,8 @@
             <input id="ocr-key" name="ocrSpaceApiKey" type="password" autocomplete="off">
           </label>
           <label>
-            DeepL API key
-            <input id="deepl-key" name="deeplApiKey" type="password" autocomplete="off">
+            Google Translation API key
+            <input id="google-key" name="googleTranslateApiKey" type="password" autocomplete="off">
           </label>
         </section>
 
@@ -30,7 +30,24 @@
           <h2>Translation</h2>
           <label>
             Target language
-            <input id="target-language" name="targetLanguage" type="text" maxlength="8" value="EN">
+            <select id="target-language" name="targetLanguage">
+              <option value="EN">English</option>
+              <option value="JA">Japanese</option>
+              <option value="KO">Korean</option>
+              <option value="ZH-CN">Chinese Simplified</option>
+              <option value="ZH-TW">Chinese Traditional</option>
+              <option value="ES">Spanish</option>
+              <option value="FR">French</option>
+              <option value="DE">German</option>
+              <option value="IT">Italian</option>
+              <option value="PT">Portuguese</option>
+              <option value="RU">Russian</option>
+              <option value="UK">Ukrainian</option>
+              <option value="VI">Vietnamese</option>
+              <option value="TH">Thai</option>
+              <option value="TR">Turkish</option>
+              <option value="AR">Arabic</option>
+            </select>
           </label>
         </section>
 

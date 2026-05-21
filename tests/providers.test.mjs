@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { buildOcrSpaceFormData, parseOcrSpaceResponse } from '../src/shared/providers/ocr-space.js';
-import { buildDeepLParams, parseDeepLResponse } from '../src/shared/providers/deepl.js';
+import { buildGoogleTranslateUrl, parseGoogleTranslateResponse } from '../src/shared/providers/google-translate.js';
 
 test('parseOcrSpaceResponse extracts parsed text and language', () => {
   const result = parseOcrSpaceResponse({
@@ -36,17 +36,23 @@ test('buildOcrSpaceFormData uses broad auto-detect OCR settings', () => {
   assert.ok(body.get('base64Image').startsWith('data:image/jpeg;base64,abc'));
 });
 
-test('parseDeepLResponse extracts translation and source language', () => {
-  const result = parseDeepLResponse({
-    translations: [{ detected_source_language: 'JA', text: 'Hello' }]
+test('parseGoogleTranslateResponse extracts translation and source language', () => {
+  const result = parseGoogleTranslateResponse({
+    data: {
+      translations: [{ detectedSourceLanguage: 'ja', translatedText: 'Hello' }]
+    }
   });
 
   assert.equal(result.text, 'Hello');
   assert.equal(result.detectedSourceLanguage, 'JA');
 });
 
-test('buildDeepLParams normalizes target language and text', () => {
-  const params = buildDeepLParams({ text: ' Bonjour ', targetLanguage: 'en' });
-  assert.equal(params.get('text'), 'Bonjour');
-  assert.equal(params.get('target_lang'), 'EN');
+test('buildGoogleTranslateUrl includes API key and normalized query parameters', () => {
+  const url = buildGoogleTranslateUrl({ apiKey: 'google-key', text: ' Bonjour ', targetLanguage: 'en' });
+
+  assert.equal(url.origin, 'https://translation.googleapis.com');
+  assert.equal(url.searchParams.get('key'), 'google-key');
+  assert.equal(url.searchParams.get('q'), 'Bonjour');
+  assert.equal(url.searchParams.get('target'), 'en');
+  assert.equal(url.searchParams.get('format'), 'text');
 });

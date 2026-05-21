@@ -8,7 +8,7 @@ import {
   toggleFavorite
 } from '../shared/history.js';
 import { isMeaningfulSelection } from '../shared/image.js';
-import { runDeepL } from '../shared/providers/deepl.js';
+import { runGoogleTranslate } from '../shared/providers/google-translate.js';
 import { runOcrSpace } from '../shared/providers/ocr-space.js';
 import { hasRequiredApiKeys, normalizeSettings } from '../shared/settings.js';
 import { cropAndCompressSelection } from './capture.js';
@@ -114,8 +114,8 @@ async function translateText({ settings, text }) {
     };
   }
 
-  const translation = await runDeepL({
-    apiKey: settings.deeplApiKey,
+  const translation = await runGoogleTranslate({
+    apiKey: settings.googleTranslateApiKey,
     text,
     targetLanguage: settings.targetLanguage
   });

@@ -85,7 +85,8 @@ label {
   max-width: 520px;
 }
 
-input {
+input,
+select {
   width: 100%;
   min-height: 36px;
   border: 1px solid var(--line);

@@ -2,13 +2,13 @@
   "manifest_version": 2,
   "name": "Tab OCR Translate",
   "version": "0.1.0",
-  "description": "Select a browser-tab region, OCR it with OCR.space, translate it with DeepL, and manage results in a sidebar.",
+  "description": "Select a browser-tab region, OCR it with OCR.space, translate it with Google Translate, and manage results in a sidebar.",
   "permissions": [
     "activeTab",
     "tabs",
     "storage",
     "https://api.ocr.space/*",
-    "https://api-free.deepl.com/*"
+    "https://translation.googleapis.com/*"
   ],
   "background": {
     "scripts": ["src/background/background.js"],

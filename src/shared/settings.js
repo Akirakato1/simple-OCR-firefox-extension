@@ -9,7 +9,7 @@ export function normalizeSettings(value = {}) {
   return {
     ...merged,
     ocrSpaceApiKey: String(merged.ocrSpaceApiKey || '').trim(),
-    deeplApiKey: String(merged.deeplApiKey || '').trim(),
+    googleTranslateApiKey: String(merged.googleTranslateApiKey || '').trim(),
     targetLanguage: String(merged.targetLanguage || DEFAULT_SETTINGS.targetLanguage).trim().toUpperCase(),
     imageFormat: merged.imageFormat === 'image/webp' ? 'image/webp' : DEFAULT_SETTINGS.imageFormat,
     imageQuality: quality > 0 && quality <= 1 ? quality : DEFAULT_SETTINGS.imageQuality,
@@ -21,5 +21,5 @@ export function normalizeSettings(value = {}) {
 
 export function hasRequiredApiKeys(settings) {
   const normalized = normalizeSettings(settings);
-  return normalized.ocrSpaceApiKey.length > 0 && normalized.deeplApiKey.length > 0;
+  return normalized.ocrSpaceApiKey.length > 0 && normalized.googleTranslateApiKey.length > 0;
 }

@@ -1,6 +1,6 @@
 export const DEFAULT_SETTINGS = Object.freeze({
   ocrSpaceApiKey: '',
-  deeplApiKey: '',
+  googleTranslateApiKey: '',
   targetLanguage: 'EN',
   imageFormat: 'image/jpeg',
   imageQuality: 0.82,

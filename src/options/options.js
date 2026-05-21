@@ -7,7 +7,7 @@ const openShortcuts = document.querySelector('#open-shortcuts');
 
 const fields = {
   ocrSpaceApiKey: document.querySelector('#ocr-key'),
-  deeplApiKey: document.querySelector('#deepl-key'),
+  googleTranslateApiKey: document.querySelector('#google-key'),
   targetLanguage: document.querySelector('#target-language'),
   imageQuality: document.querySelector('#image-quality'),
   maxUploadBytes: document.querySelector('#max-upload-bytes'),
@@ -19,7 +19,7 @@ async function loadSettings() {
   const data = await browser.storage.local.get(SETTINGS_KEY);
   const settings = normalizeSettings(data[SETTINGS_KEY]);
   fields.ocrSpaceApiKey.value = settings.ocrSpaceApiKey;
-  fields.deeplApiKey.value = settings.deeplApiKey;
+  fields.googleTranslateApiKey.value = settings.googleTranslateApiKey;
   fields.targetLanguage.value = settings.targetLanguage;
   fields.imageQuality.value = settings.imageQuality;
   fields.maxUploadBytes.value = settings.maxUploadBytes;
@@ -30,7 +30,7 @@ async function loadSettings() {
 function readForm() {
   return normalizeSettings({
     ocrSpaceApiKey: fields.ocrSpaceApiKey.value,
-    deeplApiKey: fields.deeplApiKey.value,
+    googleTranslateApiKey: fields.googleTranslateApiKey.value,
     targetLanguage: fields.targetLanguage.value,
     imageQuality: Number(fields.imageQuality.value),
     maxUploadBytes: Number(fields.maxUploadBytes.value),

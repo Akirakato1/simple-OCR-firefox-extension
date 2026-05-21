@@ -10,7 +10,7 @@ test('normalizeSettings fills defaults and clamps image quality', () => {
   assert.equal(settings.maxHistoryEntries, DEFAULT_SETTINGS.maxHistoryEntries);
 });
 
-test('hasRequiredApiKeys requires non-empty OCR.space and DeepL keys', () => {
-  assert.equal(hasRequiredApiKeys({ ocrSpaceApiKey: 'ocr', deeplApiKey: 'deepl' }), true);
-  assert.equal(hasRequiredApiKeys({ ocrSpaceApiKey: 'ocr', deeplApiKey: ' ' }), false);
+test('hasRequiredApiKeys requires non-empty OCR.space and Google Translate keys', () => {
+  assert.equal(hasRequiredApiKeys({ ocrSpaceApiKey: 'ocr', googleTranslateApiKey: 'google' }), true);
+  assert.equal(hasRequiredApiKeys({ ocrSpaceApiKey: 'ocr', googleTranslateApiKey: ' ' }), false);
 });
