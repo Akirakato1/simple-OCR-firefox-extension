@@ -17,6 +17,7 @@ import { openExtensionShortcutSettings } from './shortcuts.js';
 
 const CAPTURE_COMMAND = 'start-ocr-capture';
 const OVERLAY_FILE = '/src/content/selection-overlay.js';
+const PANEL_OVERLAY_FILE = '/src/content/ui-panel-overlay.js';
 const selectionWaiters = new Map();
 
 async function getStoredState() {
@@ -32,24 +33,8 @@ async function saveHistory(history) {
   try {
     await browser.runtime.sendMessage({ type: MESSAGES.HISTORY_CHANGED });
   } catch (_) {
-    // No sidebar listener is active.
+    // No panel listener is active.
   }
-}
-
-async function openSidebar() {
-  try {
-    await browser.sidebarAction.open();
-  } catch (_) {
-    // Firefox only permits this during user actions; capture can continue.
-  }
-}
-
-async function toggleSidebar() {
-  if (typeof browser.sidebarAction.toggle === 'function') {
-    await browser.sidebarAction.toggle();
-    return;
-  }
-  await openSidebar();
 }
 
 async function openOptionsPage() {
@@ -92,6 +77,36 @@ function waitForSelection(tabId) {
       }
     });
   });
+}
+
+async function sendPanelMessage(tabId, message) {
+  await browser.tabs.executeScript(tabId, { file: PANEL_OVERLAY_FILE, runAt: 'document_idle' });
+  return browser.tabs.sendMessage(tabId, message);
+}
+
+async function openPanel(tabId, settings) {
+  return sendPanelMessage(tabId, {
+    type: MESSAGES.OPEN_PANEL,
+    side: settings.panelSide
+  });
+}
+
+async function togglePanel(tabId, settings) {
+  return sendPanelMessage(tabId, {
+    type: MESSAGES.TOGGLE_PANEL,
+    side: settings.panelSide
+  });
+}
+
+async function setPanelVisibility(tabId, hidden) {
+  try {
+    await sendPanelMessage(tabId, {
+      type: MESSAGES.SET_PANEL_VISIBILITY,
+      hidden
+    });
+  } catch (_) {
+    // If the page cannot host content scripts, there is no panel to hide.
+  }
 }
 
 async function startSelection(tabId) {
@@ -143,10 +158,14 @@ function tabSource(tab) {
 }
 
 async function runCaptureFlow() {
-  await openSidebar();
   const tab = await activeTab();
   const source = tabSource(tab);
   const { history, settings } = await getStoredState();
+  try {
+    await openPanel(tab.id, settings);
+  } catch (error) {
+    console.error('Could not open OCR Translate panel', error);
+  }
 
   if (!hasRequiredApiKeys(settings)) {
     await openOptionsPage();
@@ -190,6 +209,7 @@ async function runCaptureFlow() {
 
   let capture;
   try {
+    await setPanelVisibility(tab.id, true);
     const tabImage = await browser.tabs.captureVisibleTab(tab.windowId, { format: 'png' });
     capture = await cropAndCompressSelection({
       imageDataUrl: tabImage,
@@ -204,6 +224,8 @@ async function runCaptureFlow() {
       source
     }), settings.maxHistoryEntries));
     return;
+  } finally {
+    await setPanelVisibility(tab.id, false);
   }
 
   let ocr;
@@ -337,6 +359,18 @@ async function openShortcutSettings() {
   return openExtensionShortcutSettings(browser);
 }
 
+async function togglePanelOnActiveTab() {
+  const tab = await activeTab();
+  const { settings } = await getStoredState();
+  return togglePanel(tab.id, settings);
+}
+
+async function openPanelOnActiveTab() {
+  const tab = await activeTab();
+  const { settings } = await getStoredState();
+  return openPanel(tab.id, settings);
+}
+
 browser.runtime.onInstalled.addListener(async ({ reason }) => {
   if (reason !== 'install') {
     return;
@@ -356,9 +390,11 @@ browser.commands.onCommand.addListener((command) => {
 });
 
 browser.browserAction.onClicked.addListener(() => {
-  toggleSidebar().catch((error) => {
-    console.error('Could not toggle sidebar from toolbar button', error);
+  const task = togglePanelOnActiveTab();
+  task.catch((error) => {
+    console.error('Could not toggle panel from toolbar button', error);
   });
+  return task;
 });
 
 browser.runtime.onMessage.addListener((message, sender) => {
@@ -392,8 +428,8 @@ browser.runtime.onMessage.addListener((message, sender) => {
   if (message?.type === MESSAGES.OPEN_OPTIONS) {
     return openOptionsPage();
   }
-  if (message?.type === MESSAGES.OPEN_SIDEBAR) {
-    return openSidebar();
+  if (message?.type === MESSAGES.OPEN_PANEL) {
+    return openPanelOnActiveTab();
   }
   if (message?.type === MESSAGES.OPEN_SHORTCUTS) {
     return openShortcutSettings();

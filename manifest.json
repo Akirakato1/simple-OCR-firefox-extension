@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "Tab OCR Translate",
   "version": "0.1.0",
-  "description": "Select a browser-tab region, OCR it with OCR.space, translate it with Google Translate, and manage results in a sidebar.",
+  "description": "Select a browser-tab region, OCR it with OCR.space, translate it with Google Translate, and manage results in an in-tab panel.",
   "permissions": [
     "activeTab",
     "tabs",
@@ -15,15 +15,21 @@
     "persistent": false,
     "type": "module"
   },
-  "sidebar_action": {
-    "default_title": "OCR Translate",
-    "default_panel": "src/sidebar/sidebar.html",
-    "open_at_install": true
-  },
   "browser_action": {
-    "default_title": "Toggle OCR Translate Sidebar",
+    "default_title": "Toggle OCR Translate Panel",
     "browser_style": true
   },
+  "web_accessible_resources": [
+    "src/sidebar/sidebar.html",
+    "src/sidebar/sidebar.css",
+    "src/sidebar/sidebar.js",
+    "src/sidebar/selection.js",
+    "src/shared/constants.js",
+    "src/shared/history.js",
+    "src/shared/languages.js",
+    "src/shared/settings.js",
+    "src/shared/theme.js"
+  ],
   "options_ui": {
     "page": "src/options/options.html",
     "open_in_tab": true

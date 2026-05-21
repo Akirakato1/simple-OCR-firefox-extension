@@ -7,7 +7,8 @@ export const DEFAULT_SETTINGS = Object.freeze({
   maxUploadBytes: 1_000_000,
   saveOriginalCrop: false,
   maxHistoryEntries: 100,
-  theme: 'system'
+  theme: 'system',
+  panelSide: 'right'
 });
 
 export const HISTORY_KEY = 'history';
@@ -32,6 +33,8 @@ export const MESSAGES = Object.freeze({
   CLEAR_NON_FAVORITES: 'clear-non-favorites',
   CLEAR_ALL: 'clear-all',
   OPEN_OPTIONS: 'open-options',
-  OPEN_SIDEBAR: 'open-sidebar',
+  OPEN_PANEL: 'open-panel',
+  TOGGLE_PANEL: 'toggle-panel',
+  SET_PANEL_VISIBILITY: 'set-panel-visibility',
   OPEN_SHORTCUTS: 'open-shortcuts'
 });

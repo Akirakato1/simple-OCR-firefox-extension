@@ -1,6 +1,11 @@
 import { DEFAULT_SETTINGS } from './constants.js';
 import { normalizeThemePreference } from './theme.js';
 
+export function normalizePanelSide(value) {
+  const side = String(value || '').trim().toLowerCase();
+  return side === 'left' || side === 'right' ? side : DEFAULT_SETTINGS.panelSide;
+}
+
 export function normalizeSettings(value = {}) {
   const merged = { ...DEFAULT_SETTINGS, ...value };
   const quality = Number(merged.imageQuality);
@@ -17,7 +22,8 @@ export function normalizeSettings(value = {}) {
     maxUploadBytes: Number.isInteger(maxUploadBytes) && maxUploadBytes > 0 ? maxUploadBytes : DEFAULT_SETTINGS.maxUploadBytes,
     saveOriginalCrop: Boolean(merged.saveOriginalCrop),
     maxHistoryEntries: Number.isInteger(maxHistoryEntries) && maxHistoryEntries > 0 ? maxHistoryEntries : DEFAULT_SETTINGS.maxHistoryEntries,
-    theme: normalizeThemePreference(merged.theme)
+    theme: normalizeThemePreference(merged.theme),
+    panelSide: normalizePanelSide(merged.panelSide)
   };
 }
 

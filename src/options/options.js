@@ -6,12 +6,13 @@ import { applyTheme, themeLabel, THEME_OPTIONS } from '../shared/theme.js';
 const form = document.querySelector('#settings-form');
 const status = document.querySelector('#status');
 const openShortcuts = document.querySelector('#open-shortcuts');
-const openSidebar = document.querySelector('#open-sidebar');
+const openPanel = document.querySelector('#open-panel');
 
 const fields = {
   ocrSpaceApiKey: document.querySelector('#ocr-key'),
   googleTranslateApiKey: document.querySelector('#google-key'),
   targetLanguage: document.querySelector('#target-language'),
+  panelSide: document.querySelector('#panel-side'),
   theme: document.querySelector('#theme'),
   imageQuality: document.querySelector('#image-quality'),
   maxUploadBytes: document.querySelector('#max-upload-bytes'),
@@ -46,6 +47,7 @@ async function loadSettings() {
   fields.ocrSpaceApiKey.value = settings.ocrSpaceApiKey;
   fields.googleTranslateApiKey.value = settings.googleTranslateApiKey;
   fields.targetLanguage.value = settings.targetLanguage;
+  fields.panelSide.value = settings.panelSide;
   fields.theme.value = settings.theme;
   fields.imageQuality.value = settings.imageQuality;
   fields.maxUploadBytes.value = settings.maxUploadBytes;
@@ -58,6 +60,7 @@ function readForm() {
     ocrSpaceApiKey: fields.ocrSpaceApiKey.value,
     googleTranslateApiKey: fields.googleTranslateApiKey.value,
     targetLanguage: fields.targetLanguage.value,
+    panelSide: fields.panelSide.value,
     theme: fields.theme.value,
     imageQuality: Number(fields.imageQuality.value),
     maxUploadBytes: Number(fields.maxUploadBytes.value),
@@ -74,9 +77,9 @@ form.addEventListener('submit', async (event) => {
   try {
     await browser.runtime.sendMessage({ type: MESSAGES.SETTINGS_CHANGED });
   } catch (_) {
-    // The sidebar may not be open while settings are saved.
+    // The panel may not be open while settings are saved.
   }
-  status.textContent = `Saved. Target language: ${languageName(settings.targetLanguage)}. Theme: ${themeLabel(settings.theme)}`;
+  status.textContent = `Saved. Target language: ${languageName(settings.targetLanguage)}. Panel: ${settings.panelSide}. Theme: ${themeLabel(settings.theme)}`;
 });
 
 openShortcuts.addEventListener('click', async () => {
@@ -88,12 +91,12 @@ openShortcuts.addEventListener('click', async () => {
   status.textContent = response?.error || 'Could not open shortcut settings. Open about:addons and choose Manage Extension Shortcuts.';
 });
 
-openSidebar.addEventListener('click', async () => {
+openPanel.addEventListener('click', async () => {
   try {
-    await browser.runtime.sendMessage({ type: MESSAGES.OPEN_SIDEBAR });
-    status.textContent = 'Opened OCR Translate sidebar. The toolbar button is available in Firefox toolbar customization.';
+    await browser.runtime.sendMessage({ type: MESSAGES.OPEN_PANEL });
+    status.textContent = 'Opened OCR Translate panel on the active tab. The toolbar button is available in Firefox toolbar customization.';
   } catch (error) {
-    status.textContent = error?.message || 'Could not open the sidebar from settings.';
+    status.textContent = error?.message || 'Could not open the panel from settings.';
   }
 });
 
