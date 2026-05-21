@@ -6,6 +6,7 @@ import { applyTheme, themeLabel, THEME_OPTIONS } from '../shared/theme.js';
 const form = document.querySelector('#settings-form');
 const status = document.querySelector('#status');
 const openShortcuts = document.querySelector('#open-shortcuts');
+const openSidebar = document.querySelector('#open-sidebar');
 
 const fields = {
   ocrSpaceApiKey: document.querySelector('#ocr-key'),
@@ -85,6 +86,15 @@ openShortcuts.addEventListener('click', async () => {
     return;
   }
   status.textContent = response?.error || 'Could not open shortcut settings. Open about:addons and choose Manage Extension Shortcuts.';
+});
+
+openSidebar.addEventListener('click', async () => {
+  try {
+    await browser.runtime.sendMessage({ type: MESSAGES.OPEN_SIDEBAR });
+    status.textContent = 'Opened OCR Translate sidebar. The toolbar button is available in Firefox toolbar customization.';
+  } catch (error) {
+    status.textContent = error?.message || 'Could not open the sidebar from settings.';
+  }
 });
 
 populateTargetLanguageOptions();

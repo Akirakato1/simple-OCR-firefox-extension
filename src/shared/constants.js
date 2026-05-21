@@ -32,5 +32,6 @@ export const MESSAGES = Object.freeze({
   CLEAR_NON_FAVORITES: 'clear-non-favorites',
   CLEAR_ALL: 'clear-all',
   OPEN_OPTIONS: 'open-options',
+  OPEN_SIDEBAR: 'open-sidebar',
   OPEN_SHORTCUTS: 'open-shortcuts'
 });

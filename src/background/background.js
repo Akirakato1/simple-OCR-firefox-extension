@@ -347,6 +347,12 @@ browser.commands.onCommand.addListener((command) => {
   }
 });
 
+browser.browserAction.onClicked.addListener(() => {
+  openSidebar().catch((error) => {
+    console.error('Could not open sidebar from toolbar button', error);
+  });
+});
+
 browser.runtime.onMessage.addListener((message, sender) => {
   if (message?.type === MESSAGES.SELECTION_COMPLETE && sender.tab?.id) {
     const waiter = selectionWaiters.get(selectionKey(sender.tab.id));
@@ -377,6 +383,9 @@ browser.runtime.onMessage.addListener((message, sender) => {
   }
   if (message?.type === MESSAGES.OPEN_OPTIONS) {
     return openOptionsPage();
+  }
+  if (message?.type === MESSAGES.OPEN_SIDEBAR) {
+    return openSidebar();
   }
   if (message?.type === MESSAGES.OPEN_SHORTCUTS) {
     return openShortcutSettings();
