@@ -2,4 +2,5 @@
 node_modules/
 web-ext-artifacts/
 .superpowers/
+AGENTS.md
 *.zip
