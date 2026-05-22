@@ -9,6 +9,7 @@ import {
 import { hasRequiredApiKeys, normalizeSettings } from '../shared/settings.js';
 import { applyTheme } from '../shared/theme.js';
 import { nextHistoryPanelState } from './selection.js';
+import { shouldReloadForStorageChange } from './storage-watch.js';
 
 const DETAIL_CLOSE_MS = 220;
 const PANEL_MESSAGE_SOURCE = 'tab-ocr-translate';
@@ -431,6 +432,12 @@ elements.clearAll.addEventListener('click', () => send(MESSAGES.CLEAR_ALL));
 
 browser.runtime.onMessage.addListener((message) => {
   if (message?.type === MESSAGES.HISTORY_CHANGED || message?.type === MESSAGES.SETTINGS_CHANGED) {
+    loadState();
+  }
+});
+
+browser.storage.onChanged.addListener((changes, areaName) => {
+  if (shouldReloadForStorageChange(changes, areaName)) {
     loadState();
   }
 });
